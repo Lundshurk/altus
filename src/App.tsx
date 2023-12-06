@@ -1,7 +1,10 @@
-import { CSSProperties, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import './App.css'
 import { InputAdornment, TextField, makeStyles, styled } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
+import { converse, getMessages } from './api/api';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 interface Message {
   sender: string;
@@ -44,14 +47,41 @@ const WhiteTextField = styled(TextField)({
 });
 
 function App() {
-  const [list, setlist] = useState<Message[]>([
-    { sender: "user", content: "barack obama" },
-    { sender: "assistant", content: "kill yourself" }
-  ]);
-
+  const [list, setlist] = useState<Message[]>([]);
+  const [uuid, setUuid] = useState<string>('create_new');
   const [textfield, settextfield] = useState <string>("");
+  const [sending, setSending] = useState <boolean>(false);
 
 
+  useEffect(() => {
+    getMessages(uuid).then((response) => {
+      setlist(response.messages.map((m) => {
+        return {
+          sender: m.role,
+          content: m.content
+        }
+      }))
+    })
+  }, [])
+
+
+  function send() {
+    setSending(true)
+
+    setlist([...list, {sender: 'user', content: textfield}])
+
+    converse(uuid, textfield).then((response) => {
+      setlist(response.messages.map((m) => {
+        return {
+          sender: m.role,
+          content: m.content
+        }
+      }))
+      setUuid(response.uuid);
+      setSending(false)
+      settextfield('')
+    })
+  }
   
 
   return (
@@ -62,8 +92,8 @@ function App() {
       <div className='chat'>
         {
           list.map((m) => (
-            <div className={`chatbox ${m.sender == 'user' ? "right" : ""}`}>
-              <h2>{m.content}</h2>
+            <div className={`chatbox ${m.sender == 'user' ? "right" : ""}`} dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(marked.parse(m.content))}}>
+              
             </div>
           ))
         }
@@ -72,7 +102,7 @@ function App() {
         <WhiteTextField
           id="outlined-multiline-flexible"
           placeholder="Prompt..."
-          onChange={(e) => {
+          onChange={(e: any) => {
             settextfield(e.target.value) 
           }}
           value={textfield}
@@ -81,11 +111,12 @@ function App() {
             width: '80%',
             marginBottom: '20px'
           }}
+          disabled={sending}
           InputProps={{
             endAdornment: <InputAdornment position="end">
               <IconButton
                 aria-label="submit prompt button"
-                onClick={() => { }}
+                onClick={send}
                 onMouseDown={() => { }}
                 edge="end"
                 children={<Arrow style={{ width: '100%', height: '100%', objectFit: 'contain' }}></Arrow>}
