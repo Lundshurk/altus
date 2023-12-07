@@ -50,6 +50,10 @@
   align-items: flex-start;
   flex-direction: column;
   overflow-y: auto;
+
+  font-family: alata;
+  font-weight: 300;
+  font-size: 0.9em;
 }
 
 .chatbox.right {
