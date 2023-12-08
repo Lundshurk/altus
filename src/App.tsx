@@ -1,11 +1,12 @@
-import { CSSProperties, createRef, useEffect, useRef, useState } from 'react';
+import { CSSProperties, createRef, useEffect, useState } from 'react';
 import './App.css'
-import { InputAdornment, TextField, makeStyles, styled } from '@mui/material';
+import { InputAdornment, TextField, styled } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import { converse, getConversations, getMessages } from './api/api';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { ChatResponse } from './api/interfaces';
+import {motion} from 'framer-motion'
 
 interface Message {
   sender: string;
@@ -55,6 +56,30 @@ function App() {
   const [history, setHistory] = useState<(ChatResponse & {title?: string})[]>();
   const chatArea = createRef<HTMLDivElement>();
 
+  const historyVariants = {
+    visible: (i: number) => ({
+      opacity: 1,
+      transition: {
+        delay: i * 0.02 // Adjust the delay as needed
+      }
+    }),
+    hidden: { opacity: 0 }
+  };
+  const chatVariants = {
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0, // end position
+      transition: {
+        delay: i * 0.01, // delay based on index
+        duration: 0.2, // duration of the animation
+        ease: "easeOut" // easing function for the animation
+      }
+    }),
+    hidden: { 
+      opacity: 0,
+      y: 20 // start position (lower)
+    }
+  };
 
   useEffect(() => {
     getConversations().then(setHistory)
@@ -124,10 +149,15 @@ function App() {
           <div className='history_message' onClick={() => setUuid("create_new")}>
             Create New
           </div>
-          {history?.map(conv => (
-            <div key={conv.uuid} className='history_message' onClick={() => setUuid(conv.uuid)}>
+          {history?.map((conv, i) => (
+            <motion.div 
+            custom={history.length - i}
+            initial="hidden"
+            animate="visible"
+            variants={historyVariants}
+            key={conv.uuid} className='history_message' onClick={() => setUuid(conv.uuid)}>
               {conv.title}
-            </div>
+            </motion.div>
           )).reverse()}
           
         </div>
@@ -135,10 +165,16 @@ function App() {
           
           <div className='chat' ref={chatArea}>
             {
-              list.map((m) => (
-                <div className={`chatbox ${m.sender == 'user' ? "right" : ""}`} dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(marked.parse(m.content) as string)}}>
+              list.map((m, i) => (
+                <motion.div 
+                custom={list.length - i}
+                initial="hidden"
+                animate="visible"
+                variants={chatVariants}
+                key={i + m.content}
+                className={`chatbox ${m.sender == 'user' ? "right" : ""}`} dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(marked.parse(m.content) as string)}}>
                   
-                </div>
+                </motion.div>
               ))
             }
           </div>
