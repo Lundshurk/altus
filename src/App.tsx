@@ -88,6 +88,9 @@ function App() {
     if(textfield.trim() == '') {
       return;
     }
+
+    
+
     setSending(true)
 
     setlist([...list, {sender: 'user', content: textfield}])
@@ -99,6 +102,11 @@ function App() {
           content: m.content
         }
       }))
+
+      if(uuid == 'create_new') {
+        getConversations().then(setHistory)
+      }
+
       setUuid(response.uuid);
       setSending(false)
       settextfield('')
@@ -113,16 +121,17 @@ function App() {
       </div>
       <div style={{height: '87%', display: 'flex'}}>
         <div className='history'>
-        <div className='history_message' onClick={() => setUuid("create_new")}>
-              Create New
-            </div>
+          <div className='history_message' onClick={() => setUuid("create_new")}>
+            Create New
+          </div>
           {history?.map(conv => (
             <div key={conv.uuid} className='history_message' onClick={() => setUuid(conv.uuid)}>
               {conv.title}
             </div>
-          ))}
+          )).reverse()}
+          
         </div>
-        <div style={{width: '80%', height: '100%'}}>
+        <div style={{width: '80%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
           
           <div className='chat' ref={chatArea}>
             {
