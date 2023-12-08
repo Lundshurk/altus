@@ -53,7 +53,7 @@ function App() {
   const [uuid, setUuid] = useState<string>('create_new');
   const [textfield, settextfield] = useState <string>("");
   const [sending, setSending] = useState<boolean>(false);
-  const [history, setHistory] = useState<(ChatResponse & {title?: string})[]>();
+  const [history, setHistory] = useState<(ChatResponse & {title?: string})[]>([]);
   const chatArea = createRef<HTMLDivElement>();
 
   const historyVariants = {

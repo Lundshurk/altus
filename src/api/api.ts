@@ -1,5 +1,8 @@
 import axios from "axios";
 import { ChatResponse } from "./interfaces";
+const useLocal = true
+const api = useLocal ? 'http://localhost:80' : 'https://api.altus.titanschedule.com'
+
 
 export async function converse(uuid:string, message:string){
     const res = await axios.post("http://localhost:80/conversation/chat", {
