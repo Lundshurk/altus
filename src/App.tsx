@@ -1,10 +1,11 @@
-import { CSSProperties, useEffect, useState } from 'react';
+import { CSSProperties, createRef, useEffect, useRef, useState } from 'react';
 import './App.css'
 import { InputAdornment, TextField, makeStyles, styled } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import { converse, getMessages } from './api/api';
+import { converse, getConversations, getMessages } from './api/api';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import { ChatResponse } from './api/interfaces';
 
 interface Message {
   sender: string;
@@ -50,10 +51,20 @@ function App() {
   const [list, setlist] = useState<Message[]>([]);
   const [uuid, setUuid] = useState<string>('create_new');
   const [textfield, settextfield] = useState <string>("");
-  const [sending, setSending] = useState <boolean>(false);
+  const [sending, setSending] = useState<boolean>(false);
+  const [history, setHistory] = useState<(ChatResponse & {title?: string})[]>();
+  const chatArea = createRef<HTMLDivElement>();
 
 
   useEffect(() => {
+    getConversations().then(setHistory)
+  }, [])
+
+  useEffect(() => {
+    if(uuid == 'create_new') {
+      setlist([])
+      return;
+    }
     getMessages(uuid).then((response) => {
       setlist(response.messages.map((m) => {
         return {
@@ -62,10 +73,21 @@ function App() {
         }
       }))
     })
-  }, [])
+  }, [uuid])
+
+
+  useEffect(() => {
+    // Scroll chat area to bottom whenever the list of messages changes
+    if (chatArea.current) {
+      chatArea.current.scrollTop = chatArea.current.scrollHeight;
+    }
+  }, [list]);
 
 
   function send() {
+    if(textfield.trim() == '') {
+      return;
+    }
     setSending(true)
 
     setlist([...list, {sender: 'user', content: textfield}])
@@ -87,51 +109,65 @@ function App() {
   return (
     <>
       <div className='altusHeader'>
-        <h1> ALTUS </h1>
+          <h1> ALTUS </h1>
       </div>
-      <div className='chat'>
-        {
-          list.map((m) => (
-            <div className={`chatbox ${m.sender == 'user' ? "right" : ""}`} dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(marked.parse(m.content))}}>
-              
+      <div style={{height: '87%', display: 'flex'}}>
+        <div className='history'>
+        <div className='history_message' onClick={() => setUuid("create_new")}>
+              Create New
             </div>
-          ))
-        }
-      </div>
-      <div className='textfield'>
-        <WhiteTextField
-          id="outlined-multiline-flexible"
-          placeholder="Prompt..."
-          onChange={(e: any) => {
-            settextfield(e.target.value) 
-          }}
-          value={textfield}
-          multiline
-          sx={{
-            width: '80%',
-            marginBottom: '20px'
-          }}
-          disabled={sending}
-          InputProps={{
-            endAdornment: <InputAdornment position="end">
-              <IconButton
-                aria-label="submit prompt button"
-                onClick={send}
-                onMouseDown={() => { }}
-                edge="end"
-                children={<Arrow style={{ width: '100%', height: '100%', objectFit: 'contain' }}></Arrow>}
-                sx={{ width: '50px', height: '50px', marginRight: '0px', }}
-              />
+          {history?.map(conv => (
+            <div key={conv.uuid} className='history_message' onClick={() => setUuid(conv.uuid)}>
+              {conv.title}
+            </div>
+          ))}
+        </div>
+        <div style={{width: '80%', height: '100%'}}>
+          
+          <div className='chat' ref={chatArea}>
+            {
+              list.map((m) => (
+                <div className={`chatbox ${m.sender == 'user' ? "right" : ""}`} dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(marked.parse(m.content) as string)}}>
+                  
+                </div>
+              ))
+            }
+          </div>
+          <div className='textfield'>
+            <WhiteTextField
+              id="outlined-multiline-flexible"
+              placeholder="Prompt..."
+              onChange={(e: any) => {
+                settextfield(e.target.value) 
+              }}
+              value={textfield}
+              multiline
+              sx={{
+                width: '80%',
+                marginBottom: '20px'
+              }}
+              disabled={sending}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">
+                  <IconButton
+                    aria-label="submit prompt button"
+                    onClick={send}
+                    onMouseDown={() => { }}
+                    edge="end"
+                    children={<Arrow style={{ width: '100%', height: '100%', objectFit: 'contain' }}></Arrow>}
+                    sx={{ width: '50px', height: '50px', marginRight: '0px', }}
+                  />
 
-            </InputAdornment>,
-          }}
+                </InputAdornment>,
+              }}
 
-        />
+            />
+          </div>
+          {/* <div className='altusFooter'>
+            <h4>footers arent real</h4>
+          </div> */}
+        </div>
       </div>
-      <div className='altusFooter'>
-        <h4>footers arent real</h4>
-      </div>
-
 
     </>
   )
