@@ -1,11 +1,11 @@
 import axios from "axios";
 import { ChatResponse } from "./interfaces";
-const useLocal = true
-const api = useLocal ? 'http://localhost:80' : 'https://api.altus.titanschedule.com'
+const useLocal = false
+const api = useLocal ? 'http://localhost:7243' : 'https://api.altus.titanschedule.com'
 
 
 export async function converse(uuid:string, message:string){
-    const res = await axios.post("http://localhost:80/conversation/chat", {
+    const res = await axios.post(api + "/conversation/chat", {
         uuid, username: "obama", message
     })
 
@@ -28,7 +28,7 @@ function extractNameFromChatResponse(chatResponse: ChatResponse) {
 }
 
 export async function getMessages(uuid:string){
-    const res = await axios.post("http://localhost:80/conversation/get_messages", {
+    const res = await axios.post(api + "/conversation/get_messages", {
         uuid, username: "obama"
     })
 
@@ -36,7 +36,7 @@ export async function getMessages(uuid:string){
 }
 
 export async function getConversations(){
-    const res = await axios.post("http://localhost:80/conversation/list", {
+    const res = await axios.post(api + "/conversation/list", {
         username: "obama"
     })
 
