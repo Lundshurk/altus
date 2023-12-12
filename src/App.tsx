@@ -147,7 +147,7 @@ function App() {
       </div>
       <div style={{height: '87%', display: 'flex'}}>
         <div className='history'>
-        <input placeholder='Your Name' onChange={(e) => setUsername(e.target.value)} value={username}></input>
+        <input placeholder='Insert your Name' onChange={(e) => setUsername(e.target.value)} value={username}></input>
           <div className='history_message' onClick={() => setUuid("create_new")}>
             Create New
           </div>
@@ -183,7 +183,7 @@ function App() {
           <div className='textfield'>
             <WhiteTextField
               id="outlined-multiline-flexible"
-              placeholder="Prompt..."
+              placeholder="Ask a question..."
               onChange={(e: any) => {
                 settextfield(e.target.value) 
               }}
