@@ -147,7 +147,7 @@ function App() {
       </div>
       <div style={{height: '87%', display: 'flex'}}>
         <div className='history'>
-        <input placeholder='Insert your Name' onChange={(e) => setUsername(e.target.value)} value={username}></input>
+        <input style={{marginTop: '30px'}} placeholder='Your Name' onChange={(e) => setUsername(e.target.value)} value={username}></input>
           <div className='history_message' onClick={() => setUuid("create_new")}>
             Create New
           </div>
