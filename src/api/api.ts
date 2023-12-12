@@ -4,9 +4,9 @@ const useLocal = false
 const api = useLocal ? 'http://localhost:7243' : 'https://api.altus.titanschedule.com'
 
 
-export async function converse(uuid:string, message:string){
+export async function converse(uuid:string, message:string, username: string){
     const res = await axios.post(api + "/conversation/chat", {
-        uuid, username: "obama", message
+        uuid, username: username, message
     })
 
 
@@ -27,17 +27,17 @@ function extractNameFromChatResponse(chatResponse: ChatResponse) {
     return conv;
 }
 
-export async function getMessages(uuid:string){
+export async function getMessages(uuid:string, username: string){
     const res = await axios.post(api + "/conversation/get_messages", {
-        uuid, username: "obama"
+        uuid, username: username
     })
 
     return extractNameFromChatResponse(res.data as ChatResponse);
 }
 
-export async function getConversations(){
+export async function getConversations(username: string){
     const res = await axios.post(api + "/conversation/list", {
-        username: "obama"
+        username: username
     })
 
     return res.data.list.map((c: ChatResponse) => extractNameFromChatResponse(c)) as (ChatResponse & {title?: string})[];

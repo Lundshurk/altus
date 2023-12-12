@@ -53,6 +53,7 @@ function App() {
   const [uuid, setUuid] = useState<string>('create_new');
   const [textfield, settextfield] = useState <string>("");
   const [sending, setSending] = useState<boolean>(false);
+  const [username, setUsername] = useState<string>('ronin');
   const [history, setHistory] = useState<(ChatResponse & {title?: string})[]>([]);
   const chatArea = createRef<HTMLDivElement>();
 
@@ -82,15 +83,15 @@ function App() {
   };
 
   useEffect(() => {
-    getConversations().then(setHistory)
-  }, [])
+    getConversations(username).then(setHistory)
+  }, [username])
 
   useEffect(() => {
     if(uuid == 'create_new') {
       setlist([])
       return;
     }
-    getMessages(uuid).then((response) => {
+    getMessages(uuid, username).then((response) => {
       setlist(response.messages.map((m) => {
         return {
           sender: m.role,
@@ -120,7 +121,7 @@ function App() {
 
     setlist([...list, {sender: 'user', content: textfield}])
 
-    converse(uuid, textfield).then((response) => {
+    converse(uuid, textfield, username).then((response) => {
       setlist(response.messages.map((m) => {
         return {
           sender: m.role,
@@ -129,7 +130,7 @@ function App() {
       }))
 
       if(uuid == 'create_new') {
-        getConversations().then(setHistory)
+        getConversations(username).then(setHistory)
       }
 
       setUuid(response.uuid);
@@ -146,6 +147,7 @@ function App() {
       </div>
       <div style={{height: '87%', display: 'flex'}}>
         <div className='history'>
+        <input placeholder='Your Name' onChange={(e) => setUsername(e.target.value)} value={username}></input>
           <div className='history_message' onClick={() => setUuid("create_new")}>
             Create New
           </div>
